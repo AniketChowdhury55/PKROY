@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <button><a href="/admin/logout" style="color: white;">Logout</a></button> <!-- Logout button -->
+
+  <!-- Add News Section -->
+  <form action="/admin/add-news" method="POST" class="form">
+    <h2>Add News</h2>
+    <input type="text" name="title" placeholder="News Title" required>
+    <textarea name="content" placeholder="News Content" required></textarea>
+    <button type="submit">Add News</button>
+  </form>
+
+  <!-- Existing News Items -->
+  <h2>Existing News</h2>
+  <div class="news-grid">
+    <% if (newsList && newsList.length > 0) { %>
+      <% newsList.forEach(news => { %>
+        <div class="news-card">
+          <h3><%= news.title %></h3>
+          <p><%= news.content %></p>
+          <small>Posted on: <%= news.date %></small>
+          <form action="/admin/delete-news" method="POST" style="margin-top: 10px;">
+            <input type="hidden" name="id" value="<%= news.id %>">
+            <button type="submit"">Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No news available. Add some news!</p>
+    <% } %>
+  </div>
+</body>
+</html>

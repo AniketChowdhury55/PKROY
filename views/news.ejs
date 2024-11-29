@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles.css">
+  <title>Latest News</title>
+</head>
+<body>
+  <section class="news-section">
+    <h1>Latest News</h1>
+    <div class="news-grid">
+      <% if (newsList.length > 0) { %>
+        <% newsList.forEach(news => { %>
+          <div class="news-card">
+            <h2><%= news.title %></h2>
+            <p><%= news.content %></p>
+            <span class="news-date">Posted on: <%= news.date %></span>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No news available. Please check back later!</p>
+      <% } %>
+    </div>
+  </section>
+</body>
+</html>
