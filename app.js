@@ -16,8 +16,8 @@ let newsList = [
 
 // Admin credentials
 const adminCredentials = {
-  username: "admin",
-  password: "password123", // Use hashed passwords in production
+  username: process.env.USER_NAME,
+  password: process.env.PASS_WORD, // Use hashed passwords in production
 };
 
 // Middleware
@@ -50,9 +50,8 @@ app.get("/home", (req, res) => {
 });
 
 // Contact form submission route
-app.post("/contact", (req, res) => {
+app.post("/submit-contact", (req, res) => {
   const { name, email, message } = req.body;
-
   // Nodemailer configuration
   const transporter = nodemailer.createTransport({
     service: 'gmail', // Update this if using another service
@@ -63,8 +62,8 @@ app.post("/contact", (req, res) => {
   });
 
   const mailOptions = {
-    from: email,
-    to: process.env.EMAIL, // Your email to receive messages
+    from: process.env.EMAIL,
+    to: process.env.TO_EMAIL, // Your email to receive messages
     subject: `Contact Form Submission from ${name}`,
     text: `
       Name: ${name}

@@ -1,3 +1,40 @@
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const hamburger = document.querySelector(".hamburger");
+    const navLinks = document.querySelector(".nav-links");
+    const navItems = document.querySelectorAll(".nav-links li"); // Select all list items
+
+    let isOpen = false; // Track the state of the menu
+
+    // Toggle the hamburger menu
+    hamburger.addEventListener("click", () => {
+      if (!isOpen) {
+        // If menu is closed, slide in
+        navLinks.classList.remove("closing");
+        navLinks.classList.add("active");
+        isOpen = true;
+      } else {
+        // If menu is open, slide out
+        navLinks.classList.remove("active");
+        navLinks.classList.add("closing");
+        isOpen = false;
+      }
+    });
+
+    // Close the hamburger menu when any navigation link is clicked
+    navItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        if (isOpen) {
+          navLinks.classList.remove("active");
+          navLinks.classList.add("closing");
+          hamburger.classList.remove("active");
+          isOpen = false;
+        }
+      });
+    });
+  });
+
+
 // Select the navbar element
 const navbar = document.querySelector('.navbar');
 
@@ -51,3 +88,32 @@ document.addEventListener("DOMContentLoaded", () => {
     scroller.style.animationDuration = `${totalHeight / 30}s`; // Adjust speed factor here
   }
 });
+
+document.getElementById("contactForm").addEventListener("submit", async function (event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Get form data
+  const formData = new FormData(event.target);
+  const data = Object.fromEntries(formData.entries());
+
+  try {
+    // Send data to the server
+    const response = await fetch("/submit-contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    // Show a success message
+    const responseMessage = document.getElementById("responseMessage");
+    responseMessage.style.display = "block";
+    responseMessage.textContent = result.message || "Thank you for contacting us!";
+  } catch (error) {
+    console.error("Error submitting the form:", error);
+  }
+});
+
