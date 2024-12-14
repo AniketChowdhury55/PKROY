@@ -126,6 +126,12 @@ app.post("/admin/delete-news", isAuthenticated, (req, res) => {
   res.redirect("/admin");
 });
 
+// 404 Not Found Middleware
+app.use((req, res, next) => {
+  res.status(404).render('404', {
+    pageTitle: 'Page Not Found',
+  });
+});
 // Start the server
 app.listen(8080, () => {
   console.log('Server is running on port 8080');
