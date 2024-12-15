@@ -45,7 +45,7 @@ function isAuthenticated(req, res, next) {
 }
 
 // Route to render the home page with the contact form
-app.get("/home", (req, res) => {
+app.get("/", (req, res) => {
   res.render("home", { newsList });
 });
 
