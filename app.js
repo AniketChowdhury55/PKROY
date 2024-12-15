@@ -43,9 +43,12 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect("/admin/login");
 }
+app.get('/', (req, res) => {
+  res.redirect('/home');
+});
 
 // Route to render the home page with the contact form
-app.get("/", (req, res) => {
+app.get("/home", (req, res) => {
   res.render("home", { newsList });
 });
 
