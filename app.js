@@ -4,15 +4,36 @@ const path = require('path');
 const session = require('express-session');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 dotenv.config();
 const app = express();
 
-// Sample data for the news section
-let newsList = [
-  { id: 1, title: "Launch of New Feature", content: "We are excited to introduce a new feature for users!", date: "2024-11-25" },
-  { id: 2, title: "Maintenance Update", content: "Scheduled maintenance will occur this Friday at 9 PM.", date: "2024-11-30" },
-];
+// File path for storing news data
+const newsFilePath = path.join(__dirname, 'news.json');
+
+// Function to load news data from news.json
+function loadNews() {
+  try {
+    const data = fs.readFileSync(newsFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Error reading news file:', err);
+    return [];
+  }
+}
+
+// Function to save news data to news.json
+function saveNews(newsList) {
+  try {
+    fs.writeFileSync(newsFilePath, JSON.stringify(newsList, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error saving news file:', err);
+  }
+}
+
+// Load news on startup
+let newsList = loadNews();
 
 // Admin credentials
 const adminCredentials = {
@@ -29,7 +50,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Session setup
 app.use(
   session({
-    secret: "secret_key", // Replace with a secure secret key
+    secret: "secret_key",
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 60000 * 30 }, // Session valid for 30 minutes
@@ -43,11 +64,13 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect("/admin/login");
 }
+
+// Redirect root to home
 app.get('/', (req, res) => {
   res.redirect('/home');
 });
 
-// Route to render the home page with the contact form
+// Home Page with News List
 app.get("/home", (req, res) => {
   res.render("home", { newsList });
 });
@@ -55,32 +78,27 @@ app.get("/home", (req, res) => {
 // Contact form submission route
 app.post("/submit-contact", (req, res) => {
   const { name, email, message } = req.body;
-  // Nodemailer configuration
+
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // Update this if using another service
+    service: 'gmail',
     auth: {
-      user: process.env.EMAIL, // Your email
-      pass: process.env.EMAIL_PASS, // Your email password
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
   const mailOptions = {
     from: process.env.EMAIL,
-    to: process.env.TO_EMAIL, // Your email to receive messages
+    to: process.env.TO_EMAIL,
     subject: `Contact Form Submission from ${name}`,
-    text: `
-      Name: ${name}
-      Email: ${email}
-      Message: ${message}
-    `,
+    text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error) => {
     if (error) {
       console.error('Error sending email:', error);
       return res.status(500).send('Error sending your message. Please try again later.');
     }
-    console.log('Email sent successfully:');
     res.send('Thank you for contacting us! We will get back to you soon.');
   });
 });
@@ -94,7 +112,7 @@ app.get("/admin/login", (req, res) => {
 app.post("/admin/login", (req, res) => {
   const { username, password } = req.body;
   if (username === adminCredentials.username && password === adminCredentials.password) {
-    req.session.isLoggedIn = true; // Set session
+    req.session.isLoggedIn = true;
     return res.redirect("/admin");
   }
   res.render("adminLogin", { error: "Invalid username or password" });
@@ -102,40 +120,49 @@ app.post("/admin/login", (req, res) => {
 
 // Admin logout
 app.get("/admin/logout", (req, res) => {
-  req.session.destroy(); // Destroy session
+  req.session.destroy();
   res.redirect("/admin/login");
 });
 
-// Admin dashboard (protected route)
+// Admin dashboard with News List
 app.get("/admin", isAuthenticated, (req, res) => {
   res.render("admin", { newsList });
 });
 
-// Route to add a new news item
+// Add a News Item
 app.post("/admin/add-news", isAuthenticated, (req, res) => {
   const { title, content } = req.body;
+
   if (title && content) {
-    const id = newsList.length > 0 ? newsList[newsList.length - 1].id + 1 : 1;
-    const date = new Date().toISOString().split("T")[0];
-    newsList.push({ id, title, content, date });
+    const newNews = {
+      id: Date.now(), // Unique ID
+      title,
+      content,
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    newsList.push(newNews);
+    saveNews(newsList); // Save updated news list to the file
   }
   res.redirect("/admin");
 });
 
-// Route to delete a news item
+// Delete a News Item
 app.post("/admin/delete-news", isAuthenticated, (req, res) => {
   const { id } = req.body;
-  newsList = newsList.filter(news => news.id !== parseInt(id));
+
+  newsList = newsList.filter((news) => news.id !== parseInt(id));
+  saveNews(newsList); // Save updated news list to the file
   res.redirect("/admin");
 });
 
-// 404 Not Found Middleware
-app.use((req, res, next) => {
-  res.status(404).render('404', {
-    pageTitle: 'Page Not Found',
-  });
+// 404 Page
+app.use((req, res) => {
+  res.status(404).render('404', { pageTitle: 'Page Not Found' });
 });
-// Start the server
-app.listen(8081, () => {
-  console.log('Server is running on port 8081');
+
+// Start the Server
+const PORT = 8081;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
