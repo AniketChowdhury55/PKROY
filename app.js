@@ -80,7 +80,7 @@ app.post("/submit-contact", (req, res) => {
       console.error('Error sending email:', error);
       return res.status(500).send('Error sending your message. Please try again later.');
     }
-    console.log('Email sent successfully:', info.response);
+    console.log('Email sent successfully:');
     res.send('Thank you for contacting us! We will get back to you soon.');
   });
 });
