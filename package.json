@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "node app.js"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +17,8 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
-    "mongoose": "^8.8.1",
+    "mongodb": "^6.12.0",
+    "mongoose": "^8.9.1",
     "node": "^23.4.0",
     "nodemailer": "^6.9.16"
   }

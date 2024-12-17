@@ -4,36 +4,25 @@ const path = require('path');
 const session = require('express-session');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
-const fs = require('fs');
+const mongoose = require('mongoose');
 
 dotenv.config();
 const app = express();
 
-// File path for storing news data
-const newsFilePath = path.join(__dirname, 'news.json');
+// MongoDB Setup
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+const db = mongoose.connection;
 
-// Function to load news data from news.json
-function loadNews() {
-  try {
-    const data = fs.readFileSync(newsFilePath, 'utf8'); 
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Error reading news file:', err);
-    return [];
-  }
-}
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+  console.log('Connected to MongoDB successfully!');
+});
 
-// Function to save news data to news.json
-function saveNews(newsList) {
-  try {
-    fs.writeFileSync(newsFilePath, JSON.stringify(newsList, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error saving news file:', err);
-  }
-}
-
-// Load news on startup
-let newsList = loadNews();
+// News Model
+const News = require('./models/news');
 
 // Admin credentials
 const adminCredentials = {
@@ -71,8 +60,14 @@ app.get('/', (req, res) => {
 });
 
 // Home Page with News List
-app.get("/home", (req, res) => {
-  res.render("home", { newsList });
+app.get("/home", async (req, res) => {
+  try {
+    const newsList = await News.find(); // Fetch news from MongoDB
+    res.render("home", { newsList });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching news.");
+  }
 });
 
 // Contact form submission route
@@ -125,35 +120,46 @@ app.get("/admin/logout", (req, res) => {
 });
 
 // Admin dashboard with News List
-app.get("/admin", isAuthenticated, (req, res) => {
-  res.render("admin", { newsList });
+app.get("/admin", isAuthenticated, async (req, res) => {
+  try {
+    const newsList = await News.find();
+    res.render("admin", { newsList });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching news.");
+  }
 });
 
 // Add a News Item
-app.post("/admin/add-news", isAuthenticated, (req, res) => {
+app.post("/admin/add-news", isAuthenticated, async (req, res) => {
   const { title, content } = req.body;
 
   if (title && content) {
-    const newNews = {
-      id: Date.now(), // Unique ID
-      title,
-      content,
-      date: new Date().toISOString().split("T")[0],
-    };
+    const newNews = new News({ title, content });
 
-    newsList.push(newNews);
-    saveNews(newsList); // Save updated news list to the file
+    try {
+      await newNews.save(); // Save to MongoDB
+      res.redirect("/admin");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Error adding news.");
+    }
+  } else {
+    res.redirect("/admin");
   }
-  res.redirect("/admin");
 });
 
 // Delete a News Item
-app.post("/admin/delete-news", isAuthenticated, (req, res) => {
+app.post("/admin/delete-news", isAuthenticated, async (req, res) => {
   const { id } = req.body;
 
-  newsList = newsList.filter((news) => news.id !== parseInt(id));
-  saveNews(newsList); // Save updated news list to the file
-  res.redirect("/admin");
+  try {
+    await News.findByIdAndDelete(id); // Delete from MongoDB
+    res.redirect("/admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting news.");
+  }
 });
 
 // 404 Page
