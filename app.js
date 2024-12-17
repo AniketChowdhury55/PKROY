@@ -15,7 +15,7 @@ const newsFilePath = path.join(__dirname, 'news.json');
 // Function to load news data from news.json
 function loadNews() {
   try {
-    const data = fs.readFileSync(newsFilePath, 'utf8');
+    const data = fs.readFileSync(newsFilePath, 'utf8'); 
     return JSON.parse(data);
   } catch (err) {
     console.error('Error reading news file:', err);
