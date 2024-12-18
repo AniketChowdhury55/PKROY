@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
+
 dotenv.config();
 const app = express();
 
@@ -48,11 +49,13 @@ app.use(
 
 // Middleware to check if admin is authenticated
 function isAuthenticated(req, res, next) {
+  console.log("Session data:", req.session); // Debugging session
   if (req.session.isLoggedIn) {
     return next();
   }
   res.redirect("/admin/login");
 }
+
 
 // Redirect root to home
 app.get('/', (req, res) => {
@@ -106,12 +109,20 @@ app.get("/admin/login", (req, res) => {
 // Handle admin login
 app.post("/admin/login", (req, res) => {
   const { username, password } = req.body;
-  if (username === adminCredentials.username && password === adminCredentials.password) {
+
+  // Validate the username and in-memory password
+  if (username === process.env.USER_NAME && password === currentAdminPassword) {
     req.session.isLoggedIn = true;
+    console.log("Admin logged in successfully.");
     return res.redirect("/admin");
+  } else {
+    console.log("Invalid username or password");
+    return res.render("adminLogin", { error: "Invalid username or password" });
   }
-  res.render("adminLogin", { error: "Invalid username or password" });
 });
+
+
+
 
 // Admin logout
 app.get("/admin/logout", (req, res) => {
@@ -160,6 +171,60 @@ app.post("/admin/delete-news", isAuthenticated, async (req, res) => {
     console.error(err);
     res.status(500).send("Error deleting news.");
   }
+});
+
+
+
+// Change password route
+const fs = require('fs');
+const bcrypt = require('bcrypt');
+
+// In-memory session password (initially from .env)
+let currentAdminPassword = process.env.PASS_WORD;
+
+// Change password route
+app.post('/admin/change-password', isAuthenticated, (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  // Step 1: Validate the current password
+  if (currentPassword !== currentAdminPassword) {
+    return res.send("Current password is incorrect.");
+  }
+
+  // Step 2: Validate new password and confirm password match
+  if (newPassword !== confirmPassword) {
+    return res.send("New password and confirm password do not match.");
+  }
+
+  // Step 3: Hash the new password
+  bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error("Error hashing the new password", err);
+      return res.status(500).send("Error updating password.");
+    }
+
+    // Step 4: Update the in-memory password (current session will use it)
+    currentAdminPassword = newPassword;
+
+    // Step 5: Update the .env file with the new password (optional, but you may still want it for initial login)
+    try {
+      const updatedEnv = fs.readFileSync('.env', 'utf8')
+        .replace(`PASS_WORD=${process.env.PASS_WORD}`, `PASS_WORD=${newPassword}`);
+
+      fs.writeFileSync('.env', updatedEnv);
+      console.log("Password updated successfully in .env");
+
+      // Step 6: Destroy the session (force logout)
+      req.session.destroy(() => {
+        console.log("Session destroyed. Password updated.");
+        res.send("Password updated successfully. Please log in again.");
+      });
+
+    } catch (err) {
+      console.error("Error updating password in .env file:", err);
+      res.status(500).send("Error updating password.");
+    }
+  });
 });
 
 // 404 Page

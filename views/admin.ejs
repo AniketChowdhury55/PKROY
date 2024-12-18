@@ -9,14 +9,33 @@
 <body>
   <h1>Admin Dashboard</h1>
   <button><a href="/admin/logout" style="color: white;">Logout</a></button> <!-- Logout button -->
+  <h2>Change Password</h2>
+  <form action="/admin/change-password" method="POST" class="change-password-form">
+    <div>
+      <label for="currentPassword">Current Password:</label>
+      <input type="password" name="currentPassword" id="currentPassword" required>
+    </div>
+    <div>
+      <label for="newPassword">New Password:</label>
+      <input type="password" name="newPassword" id="newPassword" required>
+    </div>
+    <div>
+      <label for="confirmPassword">Confirm New Password:</label>
+      <input type="password" name="confirmPassword" id="confirmPassword" required>
+    </div>
+    <button type="submit">Change Password</button>
+  </form> 
+  
 
   <!-- Add News Section -->
+   <div class="add">
   <form action="/admin/add-news" method="POST" class="form">
     <h2>Add News</h2>
     <input type="text" name="title" placeholder="News Title" required>
     <textarea name="content" placeholder="News Content" required></textarea>
     <button type="submit">Add News</button>
   </form>
+</div>
 
   <!-- Existing News Items -->
   <h2>Existing News</h2>
@@ -37,5 +56,7 @@
       <p>No news available. Add some news!</p>
     <% } %>
   </div>
+
+
 </body>
 </html>

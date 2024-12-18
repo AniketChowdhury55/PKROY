@@ -49,6 +49,11 @@ body {
   }
   
   /* Form Styles */
+  .add{
+    display: flex;
+    align-items: center;
+    justify-content:center;
+  }
   .form {
     margin: 20px 2vw;
     padding: 20px 20px;
@@ -92,6 +97,7 @@ body {
     color: white;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   .form button:hover {
@@ -174,3 +180,107 @@ body {
     }
   }
   
+/* Basic Form Styling */
+.change-password-form {
+  width: 87%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color:white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+}
+
+.change-password-form h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.change-password-form .form-group {
+  margin-bottom: 15px;
+}
+
+.change-password-form label {
+  display: block;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.change-password-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.change-password-form input:focus {
+  border-color: #0BC8CC;
+  outline: none;
+}
+
+.change-password-form button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  color: white;
+  background-color: #101E4C;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.change-password-form button:hover {
+  background-color: green;
+}
+
+.change-password-form button:active {
+  background-color: green;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .change-password-form {
+    padding: 15px;
+  }
+
+  .change-password-form h2 {
+    font-size: 1.5rem;
+  }
+
+  .change-password-form input {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .change-password-form button {
+    font-size: 1rem;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .change-password-form {
+    padding: 10px;
+  }
+
+  .change-password-form h2 {
+    font-size: 1.3rem;
+  }
+
+  .change-password-form input {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .change-password-form button {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+}
