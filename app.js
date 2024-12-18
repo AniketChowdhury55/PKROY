@@ -189,7 +189,7 @@ app.post("/admin/change-password", isAuthenticated, async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
 
   try {
-    const admin = await Admin.findOne({ username: "admin" }); // Assuming a single admin user
+    const admin = await Admin.findOne({ username: "ADMIN" }); // Assuming a single admin user
     if (!admin) {
       return res.status(404).send("Admin not found.");
     }

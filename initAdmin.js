@@ -16,21 +16,22 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", async () => {
   console.log("Connected to MongoDB");
 
-  // Check if admin user exists
-  const existingAdmin = await Admin.findOne({ username: "admin" });
+  // Check if an admin user already exists
+  const existingAdmin = await Admin.findOne({ username: process.env.USER_NAME });
   if (existingAdmin) {
-    console.log("Admin user already exists.");
-    mongoose.disconnect();
-    return;
+    // Delete the existing admin user if found
+    await Admin.deleteMany({ username: process.env.USER_NAME });
+    console.log("Existing admin user deleted.");
   }
 
-  // Create new admin user
+  // Create a new admin user
   const admin = new Admin({
-    username:process.env.USER_NAME,
-    password:process.env.PASS_WORD,
+    username: process.env.USER_NAME,
+    password: process.env.PASS_WORD,
   });
 
   await admin.save();
-  console.log("Admin user created successfully!");
+  console.log("New admin user created successfully!");
+
   mongoose.disconnect();
 });
